@@ -1,6 +1,4 @@
-
 ## Script for simulation: estimate the proprotion of VUS that are likely pathogenic. 
-
 
 library(pracma)
 library(maxLik)
@@ -15,7 +13,6 @@ fam.id = c(1:5e3)
 res.all = cbind(fam.id,proband,carrier_prob)
 non_carrier = res.all[which(res.all$BRCA1==0 & res.all$BRCA2==0), ]
 carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
-
 
 
 ## Create reported genetic test results for all probands
@@ -39,7 +36,6 @@ index2 =  which(non_carrier$fam.id %in% famid2)
 VUS = rbind(carrier[index1,], non_carrier[index2,])
 pos = carrier[-index1,]
 neg = non_carrier[-index2,]
-
 
 
 ## Logit transformation on carrier scores
