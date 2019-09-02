@@ -1,6 +1,6 @@
 
 
-# Script to generate 5000 family pedigree data and calculate carrier scores for all probands. 
+# Script to generate N family pedigree data and calculate carrier scores for all probands. 
 
 getwd()
 library(BMmultigene)
@@ -71,10 +71,10 @@ res= data.frame(pp.peelingParing(fam, prevs, lik, 2))
 
 
 # The number of family pedigree to generate 
-n = 5000
+N = 5000
 
 # Loop to combine the rest of family pedigrees 
-for (i in 2:n){
+for (i in 2:N){
   
   fam_new = sim.simFam(nSibsPatern, nSibsMatern, nSibs, nGrandchild, prevs, CP, includeGeno=TRUE)
   lik = estLik(fam_new, CP, ODP, comprisk)
