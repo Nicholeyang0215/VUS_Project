@@ -83,14 +83,3 @@ for (i in 2:n){
   fam = rbind(fam,fam_new)
   res = cbind(res,res_new)
 }
-
-res2 = t(res)
-carrier_prob = 1-res2[,1]
-proband = fam[which(fam$isProband==1),]
-
-
-fam.id = c(1:n)
-res.all = cbind(fam.id,proband,carrier_prob)
-non_carrier = res.all[which(res.all$BRCA1==0 & res.all$BRCA2==0), ]
-carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
-
