@@ -43,10 +43,14 @@ x1 = log(pos$carrier_prob/(1-pos$carrier_prob))
 x2 = log(neg$carrier_prob/(1-neg$carrier_prob))
 x3 = log(VUS$carrier_prob/(1-VUS$carrier_prob)) 
 
+## Get the range of carrier scores in reported VUS group
+VUS_min = range(x3)[1]
+VUS_max = range(x3)[2]
+
 
 ## Density function estimation 
-df1 <- approxfun(density(x1, bw = "sj", from = -8, to =11))  # (-8,11) is the empirical range, avoiding the effect of sparse tail in estimation. 
-df2 <- approxfun(density(x2, bw = "sj", from = -8, to =11))
+df1 <- approxfun(density(x1, bw = "sj", from = VUS_min, to = VUS_max))
+df2 <- approxfun(density(x2, bw = "sj", from = VUS_min, to = VUS_max))
 
 
 ## Likelihood approach to estimate 
@@ -55,4 +59,8 @@ A = matrix(c(1,-1),byrow = TRUE)
 B = c(0,1)
 ml <- maxLik(lik, start=0.4, constraints = list(ineqA=A, ineqB=B))
 point_estimate = summary(ml)$estimate[1]
+
+## Calculate positive predictive value
+scores = seq(VUS_min, VUS_max, by = 0.01)
+ppv = point_estimate*df1(scores)/(point_estimate*df1(scores) + (1-point_estimate)*df2(scores))
 
