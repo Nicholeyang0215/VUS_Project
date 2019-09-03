@@ -18,7 +18,6 @@ carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
 
 
 
-
 ## Create reported genetic test results for all probands. 
 
 # Step1: Create reported VUS probands 
@@ -57,10 +56,13 @@ x1 = log(pos2$carrier_prob/(1-pos2$carrier_prob))
 x2 = log(neg2$carrier_prob/(1-neg2$carrier_prob)) 
 x3 = log(VUS$carrier_prob/(1-VUS$carrier_prob)) 
 
-
-## Density function estimation 
-df1 <- approxfun(density(x1, bw = "sj", from = -8, to =11))
-df2 <- approxfun(density(x2, bw = "sj", from = -8, to =11))
+## Get the range of carrier scores in reported VUS group 
+VUS_min = range(x3)[1]
+VUS_max = range(x3)[2]
+  
+## Density function estimation
+df1 <- approxfun(density(x1, bw = "sj", from = VUS_min, to = VUS_max))
+df2 <- approxfun(density(x2, bw = "sj", from = VUS_min, to = VUS_max))
 
 
 ## Likelihood approach for estimation incorporting theta. 
@@ -70,3 +72,9 @@ A = matrix(c(1,-1),byrow = TRUE)
 B = c(0,1)
 ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
 point_estimate1 = summary(ml)$estimate[1]
+
+
+# Calculate positive predictive value
+scores = seq(VUS_min, VUS_max, by = 0.01)
+ppv = point_estimate*df1(scores)/(point_estimate*df1(scores) + (1-point_estimate)*df2(scores))
+  
