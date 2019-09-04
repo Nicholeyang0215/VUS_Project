@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Figure1 Script"
 author: "yunqi yang"
 date: "3/6/2019"
 output:
@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r }
-setwd("/Users/nicholeyang/Desktop/research2/VUS_paper/Result_plot")
+getwd("")
 
 library(BMmultigene)
 library(BayesMendel)
