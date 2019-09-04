@@ -1,6 +1,4 @@
-
 ## Script to generate Figure 1.
-
 getwd()
 
 library(BMmultigene)
@@ -8,14 +6,11 @@ library(BayesMendel)
 library(pracma)
 library(maxLik)
 
-
 seed <- round(runif(1, 0, 5000))
 set.seed(seed)
 
 
-
 ## Simulate 5000 family pedigrees and calculate probands' carrier probabilities. 
-
 # Consider breast cancer and ovarian cancer
 cancers = c("BC", "OC")
 
@@ -49,7 +44,6 @@ CP = genCancerPen(mutations, cancers, penCancersF, penCancersM)
 # Other causes
 ODP = genOtherDeathPen(cancers, deathOtherCauses)
 
-
 # Load data
 data(compriskSurv)
 
@@ -60,13 +54,11 @@ comprisk = list(Female=compriskSurv[,1:4], Male=compriskSurv[,5:8])
 colnames(comprisk$Female) = CP$PG 
 colnames(comprisk$Male) = CP$PG
 
-
 # Specify number of males and females in each branch of the family. 
 nSibsPatern = c(1,2) # One paternal aunt and two paternal uncles 
 nSibsMatern = c(2,2) # Two maternal aunts and two maternal uncles
 nSibs = c(2,3) # Proband has two sisters and three brothers 
 nGrandchild = c(2,1) # Each person in proband's generation has two daughters and a son 
-
 
 
 fam = sim.simFam(nSibsPatern, nSibsMatern, nSibs, nGrandchild, prevs, CP, includeGeno=TRUE)
@@ -96,8 +88,6 @@ carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
 
 
 
-
-
 ## Code for plotting Figure 1. 
 par(mfrow = c(2,2))
 
@@ -118,7 +108,6 @@ VUS = rbind(carrier[index1,], non_carrier[index2,])
 pos = carrier[-index1,]
 neg = non_carrier[-index2,]
 
-
 # Density function estimation on original scale
 x1 = pos$carrier_prob 
 x2 = neg$carrier_prob 
@@ -133,7 +122,6 @@ lines(density(x1, bw = "sj"), col = 1) #red
 lines(density(x3, bw = "sj"), col =3)  #green
 legend("topright",legend = c("Positive", "Negative","VUS"), col = c(1:3), pch = 20)
 
-
 # Density function estimation on logit scale
 lx1 = log(pos$carrier_prob/(1-pos$carrier_prob)) 
 lx2 = log(neg$carrier_prob/(1-neg$carrier_prob)) 
@@ -147,7 +135,6 @@ plot(density(lx1, bw = "sj"), col = 1, ylim = c(0,0.6),
 lines(density(lx2, bw = "sj"), col = 2) #red
 lines(density(lx3, bw = "sj"), col =3)  #green
 legend("topright",legend = c("Positive", "Negative","VUS"), col = c(1:3), pch = 20)
-
 
 
 
@@ -169,7 +156,6 @@ VUS = rbind(carrier[index1,], non_carrier[index2,])
 pos = carrier[-index1,]
 neg = non_carrier[-index2,]
 
-
 theta = 0.05
 n_falneg = round(nrow(neg)*theta/(1-theta))
 famid3 = sample(pos$fam.id, n_falneg, replace = FALSE)
@@ -177,7 +163,6 @@ index3 = which(pos$fam.id %in% famid3)
 
 pos2 = pos[-index3,]
 neg2 = rbind(neg, pos[index3,])
-
 
 
 # Density function estimation on original scale
@@ -195,7 +180,6 @@ lines(density(x3, bw = "sj"), col =3)  #green
 legend("topright",legend = c("Positive", "Negative","VUS"), col = c(1:3), pch = 20)
 
 
-
 # Density function estimation on logit scale
 lx1 = log(pos$carrier_prob/(1-pos$carrier_prob)) 
 lx2 = log(neg$carrier_prob/(1-neg$carrier_prob)) 
@@ -209,4 +193,3 @@ plot(density(lx1, bw = "sj"), col = 1, ylim = c(0,0.6),
 lines(density(lx2, bw = "sj"), col = 2) #red
 lines(density(lx3, bw = "sj"), col =3)  #green
 legend("topright",legend = c("Positive", "Negative","VUS"), col = c(1:3), pch = 20)
-
