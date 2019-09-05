@@ -21,7 +21,7 @@ This folder includes R code to conduct simulations for "A Likelihood-based Appro
 ### Simulation Step:
 
 1. Use `Fampredigree.R` to simulate `N` family pedigree data. 
-2. Use `Est_pi.R` or `Est_pitheta.R` to estimate the proportion of VUS that are likely pathogenic in simulated family pedigree data. 
+2. Use `Est_pi.R` or `Est_pitheta.R` to estimate the proportion of VUS that are likely pathogenic and the positive predictive value in simulated family pedigree data. 
 3. Repeat step1-2 2000 times for each simulation scenario. 
 
 
