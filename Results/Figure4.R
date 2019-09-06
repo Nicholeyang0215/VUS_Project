@@ -41,12 +41,12 @@ y3 = upper_q2[85:1285]  ## upper bond of PPV without NAs
 par(mfrow= c(1,2))
 
 # Plot of PPV on original scale, with CI
-plot(s1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(a) Carrier Scores on Original Scale")
+plot(s1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(a) Carrier Probabilities")
 polygon(c(s1,rev(s1)),c(y2,rev(y3)),col="gray80", border="gray87")
 lines(s1, y1, type = 'p', pch = 19,cex = 0.1, col = "black")
 
 
 # Plot of PPV on logit scale, with CI
-plot(x1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(b) Carrier Scores on Logit Scale")
+plot(x1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(b) Logit Carrier Probabilities")
 polygon(c(x1,rev(x1)),c(y2,rev(y3)),col="gray80", border="gray87")
 lines(x1, y1, type = 'p', pch = 19,cex = 0.1, col = "black")
