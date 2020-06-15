@@ -1,4 +1,4 @@
-## Script to generate N family pedigree data and calculate carrier scores for all probands. 
+## Description: this script is to generate N family pedigree data using a constant family size and structure and calculate carrier scores for all probands. 
 
 getwd()
 library(BMmultigene)
