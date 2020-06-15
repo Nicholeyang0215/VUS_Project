@@ -22,7 +22,7 @@ set.seed(script_num)
 load("usc_fam_structs.rData")
 sample_structure_id = sample(1:2000, 1)
 
-N = 1e5
+N = 1e3
 
 
 # Consider breast cancer and ovarian cancer
