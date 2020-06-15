@@ -80,3 +80,12 @@ for (i in 2:N){
   fam = rbind(fam,fam_new)
   res = cbind(res,res_new)
 }
+
+## Subset probands with carrier scores and true pathogenic status
+res2 = t(res)
+carrier_prob = 1-res2[,1]
+proband = fam[which(fam$isProband==1),]
+
+fam.id = c(1:5e3)
+res.all = cbind(fam.id,proband,carrier_prob)
+
