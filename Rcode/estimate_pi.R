@@ -1,19 +1,26 @@
-## Script for simulation: estimate the proprotion of VUS that are likely pathogenic. 
+## Description: this simulation script is to estimate the proprotion of VUS that are likely pathogenic 
+## (true_pi= 0.1 is specified at beginning). It also contains the code for calculating positive predictive value.
+
 
 library(pracma)
 library(maxLik)
 
-## Subset probands with carrier scores and true pathogenic status
-# res: the N family pedigrees generated from Fampedigree.R
-res2 = t(res)
-carrier_prob = 1-res2[,1]
-proband = fam[which(fam$isProband==1),]
 
-fam.id = c(1:5e3)
-res.all = cbind(fam.id,proband,carrier_prob)
+script_num=1
+
+# get script_num from command line
+args = commandArgs(trailingOnly=T)
+if (length(args)>=1) {
+  script_num = as.numeric(args[1])
+}
+
+## Load simulated family pedigree data
+load(paste0("../family_data/5k_families/5k_fam", script_num, ".RData"))
+
 non_carrier = res.all[which(res.all$BRCA1==0 & res.all$BRCA2==0), ]
 carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
 
+set.seed(script_num)
 
 ## Create reported genetic test results for all probands
 
@@ -24,7 +31,7 @@ carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
 # VUS: reported VUS probands 
 # pos: reported positive probands 
 # neg: reported negative probands 
-true_pi = 0.01
+true_pi = 0.1
 prop_VUS = 0.3
 n_pos = nrow(res.all)*prop_VUS*true_pi
 n_neg = nrow(res.all)*prop_VUS*(1-true_pi)
@@ -59,6 +66,9 @@ A = matrix(c(1,-1),byrow = TRUE)
 B = c(0,1)
 ml <- maxLik(lik, start=0.4, constraints = list(ineqA=A, ineqB=B))
 point_estimate = summary(ml)$estimate[1]
+
+save(point_estimate, file=paste0("../results/5k_res_", script_num, ".RData"))
+
 
 ## Calculate positive predictive value
 scores = seq(VUS_min, VUS_max, by = 0.01)
