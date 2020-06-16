@@ -15,7 +15,7 @@ This folder includes R code to conduct simulations for "A Likelihood-based Appro
 
 - estimate_pi_with_theta.R: script to esitmate the proportion of VUS that are likely pathogenic and calculate positive predictive value in simulated data with the extension of `theta`.
 
-#### 2. Results folder: 'Data' contains all simulated data for Figures. Figure1-4.R contain scripts to generate Figure1-4.png. 
+#### 2. Results folder: 'Data' contains simulated data for Figures 1-6. It also contains scripts for generating Figure1-6. 
 
 
 
