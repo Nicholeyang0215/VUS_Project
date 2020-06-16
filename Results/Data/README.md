@@ -1,5 +1,5 @@
 
-# Description: This folder contains estimation results based on simulated cohort data. 
+## Description: This folder contains estimation results based on simulated cohort data. 
 
 1. Those .csv files are summarized results for generating Figure 2-3 in the main text. The setting of sample size = 1 million
 contain 50 replicates, while all other scenarios contain 2000 estimation replicates. 
