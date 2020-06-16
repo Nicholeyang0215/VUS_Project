@@ -1,0 +1,560 @@
+---
+title: "data application2"
+author: "yunqi yang"
+date: "4/18/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r  }
+
+library(BMmultigene)
+library(BayesMendel)
+library(pracma)
+library(maxLik)
+library(ggplot2)
+library(gridExtra)
+
+
+load("/Users/nicholeyang/Desktop/research2/VUS_paper/data/res_summary.RData")
+
+
+```
+
+
+```{r  }
+
+##### BRCApro result
+brca = val3[,c("BRCA1or2","GenTestTable.Gene.1.gt","Myriad_panel")]
+brca_score =  as.numeric(as.character(brca$BRCA1or2)) 
+brca1 = brca[-which(is.na(brca_score)), ]
+
+
+pos = brca1[which(brca1$Myriad_panel=="Positive"),]
+pos_brca = pos$BRCA1or2[which(pos$GenTestTable.Gene.1.gt == "BRCA1" | pos$GenTestTable.Gene.1.gt =="BRCA2")]
+
+VUS = brca1[which(brca1$Myriad_panel=="VUS" | brca1$Myriad_panel=="VUS - Suspect Del/ Likely Pathogenic"),]
+VUS_brca = VUS$BRCA1or2[which(VUS$GenTestTable.Gene.1.gt == "BRCA1" | VUS$GenTestTable.Gene.1.gt == "BRCA2")]
+
+neg = brca1[which(brca1$Myriad_panel == "Negative"),]
+neg_brca = neg$BRCA1or2
+
+  
+pos1 = as.numeric(as.character(pos_brca))   ###positive carrier probabilities. 76 
+VUS1 = as.numeric(as.character(VUS_brca))   #### VUS 30 
+neg1 = as.numeric(as.character(neg_brca))    
+
+
+```
+
+
+```{r  }
+
+
+###### transform to logit scale 
+x1 = log(pos1/(1-pos1)) ###positive carrier probabilities 
+x2 = log(neg1/(1-neg1)) ###negative carrier probabilities 
+x3 = log(VUS1/(1-VUS1)) 
+
+upper = max(c(x1, x2, x3))
+lower = min(c(x1, x2, x3))
+
+
+
+## Get the range of carrier scores in reported VUS group 
+  
+df1 <- approxfun(density(x1, bw = "sj", from = lower, to = upper))
+df2 <- approxfun(density(x2, bw = "sj", from = lower, to = upper))
+
+
+plot(density(x1))
+```
+
+```{r  }
+
+
+##### result on logit scale 
+
+########## maximum likelihood approach #################
+theta =0
+  
+lik <- function(pi) sum(log(pi*df1(x3)+(1-pi)*((df2(x3) - theta*df1(x3))/(1-theta))))
+  
+A = matrix(c(1,-1),byrow = TRUE)
+B = c(0,1)
+ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+point_estimate1 = summary(ml)$estimate[1]
+
+point_estimate1
+
+```
+
+```{r  }
+
+  ## random shuffle the data 
+  indx <- sample(1:dim(dt)[1], size = dim(dt)[1], replace = TRUE)
+  new_dt <- dt[c(indx), ]
+  
+  ## logit scale carrier probs 
+  pos_brca <- new_dt$CarrierProb[new_dt$TestResult == "Positive"]
+  neg_brca <- new_dt$CarrierProb[new_dt$TestResult == "Negative"]
+  VUS_brca <- new_dt$CarrierProb[new_dt$TestResult == "VUS"]
+  
+  pos2 = as.numeric(as.character(pos_brca))   
+  VUS2 = as.numeric(as.character(VUS_brca))   
+  neg2 = as.numeric(as.character(neg_brca))    
+  
+  ## get the range of logit carrier scores
+  
+  upper = max(c(pos2, neg2, VUS2))
+  lower = min(c(pos2, neg2, VUS2))
+  
+  df1 <- approxfun(density(pos2, bw = "sj", from = lower, to = upper))
+  df2 <- approxfun(density(neg2, bw = "sj", from = lower, to = upper))
+
+
+  ## Maximum likelihood estimation 
+  theta =0
+  
+  lik <- function(pi) sum(log(pi*df1(VUS2)+(1-pi)*((df2(VUS2) - theta*df1(VUS2))/(1-theta))))
+  
+  A = matrix(c(1,-1),byrow = TRUE)
+  B = c(0,1)
+  ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+  point_estimate = summary(ml)$estimate[1]
+ point_estimate
+
+```
+
+
+
+```{r  }
+
+for (i in c(1:2000))
+{
+  
+  ## random shuffle the data 
+  indx <- sample(1:dim(dt)[1], size = dim(dt)[1], replace = TRUE)
+  new_dt <- dt[c(indx), ]
+  
+  ## logit scale carrier probs 
+  pos_brca <- new_dt$CarrierProb[new_dt$TestResult == "Positive"]
+  neg_brca <- new_dt$CarrierProb[new_dt$TestResult == "Negative"]
+  VUS_brca <- new_dt$CarrierProb[new_dt$TestResult == "VUS"]
+  
+  pos2 = as.numeric(as.character(pos_brca))   
+  VUS2 = as.numeric(as.character(VUS_brca))   
+  neg2 = as.numeric(as.character(neg_brca))    
+  
+  ## get the range of logit carrier scores
+  
+  upper = max(c(pos2, neg2, VUS2))
+  lower = min(c(pos2, neg2, VUS2))
+  
+  df1 <- approxfun(density(pos2, bw = "sj", from = lower, to = upper))
+  df2 <- approxfun(density(neg2, bw = "sj", from = lower, to = upper))
+
+
+  ## Maximum likelihood estimation 
+  theta =0
+  
+  lik <- function(pi) sum(log(pi*df1(VUS2)+(1-pi)*((df2(VUS2) - theta*df1(VUS2))/(1-theta))))
+  
+  A = matrix(c(1,-1),byrow = TRUE)
+  B = c(0,1)
+  ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+  point_estimate[i] = summary(ml)$estimate[1]
+  
+  ## Calculate PPV 
+  PPVs[i, ] = point_estimate[i]*df1(logit_scores)/(point_estimate[i]*df1(logit_scores) + (1-   point_estimate[i])*df2(logit_scores))
+  
+}
+
+
+```
+
+
+```{r  }
+
+mean(point_estimate)
+quantile(point_estimate, 0.025)
+quantile(point_estimate, 0.975)
+hist(point_estimate)
+
+
+```
+
+############################################
+###### positive predictive value calculation
+############################################
+
+
+```{r  }
+
+par(mfrow=c(1,2),oma = c(0, 0, 2, 0))
+
+## range of logit scores = c(min(carrier_score), max(carrier_score))
+logit_scores = seq(lower, upper, by = 0.01)
+scores = exp(logit_scores)/(1+exp(logit_scores))
+
+
+ppv = point_estimate1*df1(logit_scores)/(point_estimate1*df1(logit_scores) + (1-point_estimate1)*df2(logit_scores))
+
+
+plot(scores, ppv, type = "l", ylab = "Positive Predictive Value", xlab = "(a) Carrier Probabilities")
+abline( h= 0.8, col = "blue", lty = 2)
+abline( h= 0.9, col = "red", lty = 2)
+
+
+plot(logit_scores, ppv, type = "l", ylab = "Positive Predictive Value", xlab = "(b) Logit Carrier Probabilities")
+abline( h= 0.8, col = "blue", lty = 2)
+abline( h= 0.9, col = "red", lty = 2)
+
+```
+
+
+# find a VUS carrier with high positive predictive value. 
+```{r  }
+
+dt.VUS = val3[which(brca1$Myriad_panel=="VUS" | brca1$Myriad_panel=="VUS - Suspect Del/ Likely Pathogenic"),]
+dt.brca = dt.VUS[which(dt.VUS$GenTestTable.Gene.1.gt == "BRCA1" | dt.VUS$GenTestTable.Gene.1.gt == "BRCA2"),]
+
+score = as.numeric(as.character(dt.brca$BRCA1or2))
+logit_scores = log(score/(1-score))
+
+dt.ppv = point_estimate1*df1(logit_scores)/(point_estimate1*df1(logit_scores) + (1-point_estimate1)*df2(logit_scores))
+
+dt.ppv[order(dt.ppv, decreasing = T)]
+
+order.ppv = dt.brca[order(dt.ppv, decreasing = T), ]
+large.ppv = order.ppv[1:2,]
+
+```
+
+
+
+## Bootstrap CI 
+
+```{r  }
+
+logit_scores = seq(lower, upper, by = 0.01)
+TestResult <- c(rep('Positive',length(x1)), rep('Negative',length(x2)),  rep('VUS',length(x3)))
+CarrierProb <- c(x1, x2, x3)  # on logit scale
+dt <- data.frame(cbind(TestResult, CarrierProb))
+
+
+## replicates 
+point_estimate = rep(NA, 2000)
+PPVs = matrix(NA, nrow = 2000, ncol = length(logit_scores))
+
+```
+
+```{r  }
+
+for (i in c(1:2000))
+{
+  
+  ## random shuffle the data 
+  indx <- sample(1:dim(dt)[1], size = dim(dt)[1], replace = TRUE)
+  new_dt <- dt[c(indx), ]
+  
+  ## logit scale carrier probs 
+  pos_brca <- new_dt$CarrierProb[new_dt$TestResult == "Positive"]
+  neg_brca <- new_dt$CarrierProb[new_dt$TestResult == "Negative"]
+  VUS_brca <- new_dt$CarrierProb[new_dt$TestResult == "VUS"]
+  
+  pos2 = as.numeric(as.character(pos_brca))   
+  VUS2 = as.numeric(as.character(VUS_brca))   
+  neg2 = as.numeric(as.character(neg_brca))    
+  
+  ## get the range of logit carrier scores
+  
+  upper = max(c(pos2, neg2, VUS2))
+  lower = min(c(pos2, neg2, VUS2))
+  
+  df1 <- approxfun(density(pos2, bw = "sj", from = lower, to = upper))
+  df2 <- approxfun(density(neg2, bw = "sj", from = lower, to = upper))
+
+
+  ## Maximum likelihood estimation 
+  theta =0
+  
+  lik <- function(pi) sum(log(pi*df1(VUS2)+(1-pi)*((df2(VUS2) - theta*df1(VUS2))/(1-theta))))
+  
+  A = matrix(c(1,-1),byrow = TRUE)
+  B = c(0,1)
+  ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+  point_estimate[i] = summary(ml)$estimate[1]
+  
+  ## Calculate PPV 
+  PPVs[i, ] = point_estimate[i]*df1(logit_scores)/(point_estimate[i]*df1(logit_scores) + (1-   point_estimate[i])*df2(logit_scores))
+  
+}
+
+
+```
+
+
+
+```{r  }
+
+setEPS()
+postscript("Figure6.eps")
+
+
+lower_CI <- apply(PPVs, MARGIN = 2, function(x) quantile(x, 0.05, na.rm = TRUE))
+upper_CI <- apply(PPVs, MARGIN = 2, function(x) quantile(x, 0.95, na.rm = TRUE))
+scores <- exp(logit_scores)/(1+exp(logit_scores))
+
+
+par(mfrow=c(1,2),oma = c(0, 0, 2, 0))
+
+##
+plot(logit_scores, ppv, type = 'l', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(a) Logit Carrier Probabilities")
+polygon(c(logit_scores,rev(logit_scores)),c(lower_CI, rev(upper_CI)), col="gray90", border="gray90")
+lines(logit_scores, ppv, type = 'l', pch = 19,cex = 0.1, col = "black")
+abline( h= 0.8, col = "blue", lty = 2)
+abline( h= 0.9, col = "red", lty = 2)
+
+##
+plot(scores, ppv, type = 'l', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(b) Carrier Probabilities")
+polygon(c(scores,rev(scores)),c(lower_CI, rev(upper_CI)),col="gray90", border="gray90")
+lines(scores, ppv, type = 'l', pch = 19,cex = 0.1, col = "black")
+abline( h= 0.8, col = "blue", lty = 2)
+abline( h= 0.9, col = "red", lty = 2)
+
+
+dev.off()
+
+
+```
+
+
+
+
+```{r  }
+
+x1 = x[85:1285]
+s1 = exp(x[85:1285])/(1+exp(x[85:1285]))   ## carrier scores on the original scale
+y1 = means2[85:1285]    ## means of PPV
+y2 = lower_q2[85:1285]  ## lower bond of ppv 
+y3 = upper_q2[85:1285]  ## upper bond of ppv 
+
+
+
+
+par(mfrow= c(1,2))
+
+## plot of ppv, with CI
+plot(s1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(a) Carrier Scores on Original Scale")
+polygon(c(s1,rev(s1)),c(y2,rev(y3)),col="gray80", border="gray87")
+lines(s1, y1, type = 'p', pch = 19,cex = 0.1, col = "black")
+
+
+## plot of ppv, with CI
+plot(x1, y1, type = 'p', pch = 19,cex = 0.1, ylab = "Positive Predictive Value", xlab = "(b) Carrier Scores on Logit Scale")
+polygon(c(x1,rev(x1)),c(y2,rev(y3)),col="gray80", border="gray87")
+lines(x1, y1, type = 'p', pch = 19,cex = 0.1, col = "black")
+```
+
+
+
+
+
+#####################################################
+################## Sensitivity analysis #############
+#####################################################
+
+
+### theta = 0.01
+
+```{r  }
+
+
+##### result on logit scale 
+
+########## maximum likelihood approach #################
+theta =0.01
+  
+lik <- function(pi) sum(log(pi*df1_1(x3)+(1-pi)*((df2_1(x3) - theta*df1_1(x3))/(1-theta))))
+  
+A = matrix(c(1,-1),byrow = TRUE)
+B = c(0,1)
+ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+point_estimate1 = summary(ml)$estimate[1]
+
+point_estimate1
+
+```
+
+## theta = 0 
+```{r  }
+
+theta =0
+  
+lik <- function(pi) sum(log(pi*df1_1(x3)+(1-pi)*((df2_1(x3) - theta*df1_1(x3))/(1-theta))))
+  
+A = matrix(c(1,-1),byrow = TRUE)
+B = c(0,1)
+ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+point_estimate1 = summary(ml)$estimate[1]
+
+point_estimate1
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r  }
+
+##### Construct CI 
+
+point_estimate = rep(NA, 2000)
+n_carriers = rep(NA, 2000)
+n_VUS = rep(NA, 2000)
+  
+for (i in c(1:2000))
+{
+  
+  indx = sample(1:1995, size = 1995, replace = TRUE)
+  new_brca = brca1[indx,]
+
+  pos = new_brca[which(new_brca$Myriad_panel=="Positive"),]
+  pos_brca = pos$BRCA1or2[which(pos$GenTestTable.Gene.1.gt == "BRCA1" | pos$GenTestTable.Gene.1.gt =="BRCA2")]
+
+  VUS = new_brca[which(new_brca$Myriad_panel=="VUS" | new_brca$Myriad_panel=="VUS - Suspect Del/ Likely Pathogenic"),]
+  VUS_brca = VUS$BRCA1or2[which(VUS$GenTestTable.Gene.1.gt == "BRCA1" | VUS$GenTestTable.Gene.1.gt == "BRCA2")]
+
+  neg = new_brca[which(new_brca$Myriad_panel == "Negative"),]
+  neg_brca = neg$BRCA1or2
+
+  
+  pos1 = as.numeric(as.character(pos_brca))   ###positive carrier probabilities. 76 
+  VUS1 = as.numeric(as.character(VUS_brca))   #### VUS 30 
+  neg1 = as.numeric(as.character(neg_brca))    
+  
+  n_carriers[i] = length(pos1)
+  n_VUS[i] = length(VUS1)
+
+  x1 = log(pos1/(1-pos1)) ###positive carrier probabilities 
+  x2 = log(neg1/(1-neg1)) ###negative carrier probabilities 
+  x3 = log(VUS1/(1-VUS1)) 
+  
+  df1_1 <- approxfun(density(x1, bw = "sj", from = -15, to =11))
+  df2_1 <- approxfun(density(x2, bw = "sj", from = -15, to =11))
+
+
+##### Maximum likelihood estimation 
+  theta =0.01
+  
+  lik <- function(pi) sum(log(pi*df1_1(x3)+(1-pi)*((df2_1(x3) - theta*df1_1(x3))/(1-theta))))
+  
+  A = matrix(c(1,-1),byrow = TRUE)
+  B = c(0,1)
+  ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+  point_estimate[i] = summary(ml)$estimate[1]
+  
+}
+
+hist(point_estimate)
+mean(point_estimate)
+quantile(point_estimate, 0.025)
+quantile(point_estimate, 0.975)
+
+
+```
+
+
+### theta = 0.05
+
+```{r  }
+
+
+##### result on logit scale 
+
+########## maximum likelihood approach #################
+theta =0.05
+  
+lik <- function(pi) sum(log(pi*df1_1(x3)+(1-pi)*((df2_1(x3) - theta*df1_1(x3))/(1-theta))))
+  
+A = matrix(c(1,-1),byrow = TRUE)
+B = c(0,1)
+ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+point_estimate1 = summary(ml)$estimate[1]
+
+point_estimate1
+
+```
+
+
+```{r  }
+
+##### Construct CI 
+
+point_estimate = rep(NA, 2000)
+n_carriers = rep(NA, 2000)
+n_VUS = rep(NA, 2000)
+  
+for (i in c(1:2000))
+{
+  
+  indx = sample(1:1995, size = 1995, replace = TRUE)
+  new_brca = brca1[indx,]
+
+  pos = new_brca[which(new_brca$Myriad_panel=="Positive"),]
+  pos_brca = pos$BRCA1or2[which(pos$GenTestTable.Gene.1.gt == "BRCA1" | pos$GenTestTable.Gene.1.gt =="BRCA2")]
+
+  VUS = new_brca[which(new_brca$Myriad_panel=="VUS" | new_brca$Myriad_panel=="VUS - Suspect Del/ Likely Pathogenic"),]
+  VUS_brca = VUS$BRCA1or2[which(VUS$GenTestTable.Gene.1.gt == "BRCA1" | VUS$GenTestTable.Gene.1.gt == "BRCA2")]
+
+  neg = new_brca[which(new_brca$Myriad_panel == "Negative"),]
+  neg_brca = neg$BRCA1or2
+
+  
+  pos1 = as.numeric(as.character(pos_brca))   ###positive carrier probabilities. 76 
+  VUS1 = as.numeric(as.character(VUS_brca))   #### VUS 30 
+  neg1 = as.numeric(as.character(neg_brca))    
+  
+  n_carriers[i] = length(pos1)
+  n_VUS[i] = length(VUS1)
+
+  x1 = log(pos1/(1-pos1)) ###positive carrier probabilities 
+  x2 = log(neg1/(1-neg1)) ###negative carrier probabilities 
+  x3 = log(VUS1/(1-VUS1)) 
+  
+  df1_1 <- approxfun(density(x1, bw = "sj", from = -15, to =11))
+  df2_1 <- approxfun(density(x2, bw = "sj", from = -15, to =11))
+
+
+##### Maximum likelihood estimation 
+  theta =0.05
+  
+  lik <- function(pi) sum(log(pi*df1_1(x3)+(1-pi)*((df2_1(x3) - theta*df1_1(x3))/(1-theta))))
+  
+  A = matrix(c(1,-1),byrow = TRUE)
+  B = c(0,1)
+  ml <- maxLik(lik, start=0.7, constraints = list(ineqA=A, ineqB=B))
+  point_estimate[i] = summary(ml)$estimate[1]
+  
+}
+
+hist(point_estimate)
+mean(point_estimate)
+quantile(point_estimate, 0.025)
+quantile(point_estimate, 0.975)
+
+
+```
+
+
