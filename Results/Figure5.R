@@ -1,15 +1,13 @@
 
 library(ggplot2)
 
-setwd("/Users/nicholeyang/Desktop/research2/USC_dropbox folder/VUS_paper result")
+## load USC-Stanford data 
 load("res_summary.RData")
 
-
-##### BRCApro result
+## BRCApro result
 brca = val3[,c("BRCA1or2","GenTestTable.Gene.1.gt","Myriad_panel")]
 brca_score =  as.numeric(as.character(brca$BRCA1or2)) 
 brca1 = brca[-which(is.na(brca_score)), ]
-
 
 pos = brca1[which(brca1$Myriad_panel=="Positive"),]
 pos_brca = pos$BRCA1or2[which(pos$GenTestTable.Gene.1.gt == "BRCA1" | pos$GenTestTable.Gene.1.gt =="BRCA2")]
@@ -20,13 +18,11 @@ VUS_brca = VUS$BRCA1or2[which(VUS$GenTestTable.Gene.1.gt == "BRCA1" | VUS$GenTes
 neg = brca1[which(brca1$Myriad_panel == "Negative"),]
 neg_brca = neg$BRCA1or2
 
-
-pos1 = as.numeric(as.character(pos_brca))   ###positive carrier probabilities. 76 
-VUS1 = as.numeric(as.character(VUS_brca))   #### VUS 30 
+pos1 = as.numeric(as.character(pos_brca))   ## positive carrier probabilities. 76 
+VUS1 = as.numeric(as.character(VUS_brca))   ## VUS 30 
 neg1 = as.numeric(as.character(neg_brca))    
 
-
-## to logit scale  
+## tranform to logit scale  
 pos2 = log(pos1/(1-pos1))
 neg2 = log(neg1/(1-neg1)) 
 VUS2 = log(VUS1/(1-VUS1)) 
@@ -49,7 +45,6 @@ setEPS()
 postscript("Figure5.eps")
 
 
-
 par(mfrow = c(1,2))
 
 ## QQplot
@@ -60,7 +55,6 @@ points(sort(df$sx), sort(df$sz), col = "red", pch =20, cex = 0.7)
 
 ## diagonal line
 abline(0,1)
-
 legend("topright",legend = c("Positive", "Negative"), col = c(1:2), pch = 20, cex=0.75) 
 
 
