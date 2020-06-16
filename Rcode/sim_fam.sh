@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -n 2 # cores
+#SBATCH -n 1 # cores
 #SBATCH -N 1 # nodes
 #SBATCH -p serial_requeue # Partition
 #SBATCH -t 0-00:30 # (D-HH:MM)
