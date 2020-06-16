@@ -22,9 +22,10 @@ This folder includes R code to conduct simulations for "A Likelihood-based Appro
 
 ### Simulation Step:
 
-1. Use `sim_fam_varied.R` to simulate `N` family pedigree data. 
+1. Use `sim_fam_varied.R` to simulate family pedigree data of size `N`. Under each sample size, replicates are named with `script_num.RData`.  
 2. Use `estimate_pi.R` or `estimate_pi_with_theta.R` to estimate the proportion of VUS that are likely pathogenic and the positive predictive value in simulated family pedigree data. 
-3. Repeat step1-2 2000 times for each simulation scenario. 
+3. Repeat step1-2 for all simulated cohort replicates. 
+
 
 
 
