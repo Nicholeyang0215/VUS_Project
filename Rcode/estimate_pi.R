@@ -17,6 +17,7 @@ if (length(args)>=1) {
 ## Load simulated family pedigree data
 load(paste0("../family_data/5k_families/5k_fam", script_num, ".RData"))
 
+res.all = res.sub
 non_carrier = res.all[which(res.all$BRCA1==0 & res.all$BRCA2==0), ]
 carrier = res.all[which(res.all$BRCA1==1 | res.all$BRCA2==1),]
 
